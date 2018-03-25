@@ -248,7 +248,7 @@ SDK.createMainConnection = function(params, connectionLostCallback) {
   const wssParam = Runtime.queryParam('wss');
 
   if (wsParam || wssParam) {
-    const ws = wsParam ? `ws://${wsParam}` : `wss://${wssParam}`;
+    const ws = wsParam ? `ws://${decodeURIComponent(wsParam)}` : `wss://${decodeURIComponent(/** @type {string} */(wssParam))}`;
     return new SDK.WebSocketConnection(ws, connectionLostCallback, params);
   }
 

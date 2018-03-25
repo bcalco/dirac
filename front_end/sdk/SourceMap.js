@@ -113,6 +113,11 @@ SDK.SourceMap.prototype = {
   url() {},
 
   /**
+   * @return {?SDK.SourceMapV3}
+   */
+  payload: function() {},
+
+  /**
    * @return {!Array<string>}
    */
   sourceURLs() {},
@@ -200,6 +205,7 @@ SDK.TextSourceMap = class {
         SDK.TextSourceMap._base64Map[base64Digits.charAt(i)] = i;
     }
 
+    this._payload = payload;
     this._json = payload;
     this._compiledURL = compiledURL;
     this._sourceMappingURL = sourceMappingURL;
@@ -262,6 +268,14 @@ SDK.TextSourceMap = class {
    */
   url() {
     return this._sourceMappingURL;
+  }
+
+  /**
+   * @override
+   * @return {?SDK.SourceMapV3}
+   */
+  payload() {
+    return this._payload;
   }
 
   /**
@@ -337,7 +351,7 @@ SDK.TextSourceMap = class {
     const mappings = this._reversedMappings(sourceURL);
     const first = mappings.lowerBound(lineNumber, lineComparator);
     const last = mappings.upperBound(lineNumber, lineComparator);
-    if (first >= mappings.length || mappings[first].sourceLineNumber !== lineNumber)
+    if (first >= mappings.length || mappings[first].sourceLineNumber !==lineNumber )
       return null;
     const columnMappings = mappings.slice(first, last);
     const index =

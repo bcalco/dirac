@@ -18,7 +18,9 @@
     { "name": "text_utils", "type": "autostart" },
     { "name": "ui", "type": "autostart" },
     { "name": "workspace", "type": "autostart" },
+    { "name": "dirac", "type": "autostart" },
 
+    { "name": "dirac_lazy" },
     { "name": "changes" },
     { "name": "cm" },
     { "name": "cm_modes", "type": "remote" },

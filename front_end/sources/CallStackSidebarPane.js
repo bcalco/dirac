@@ -178,6 +178,17 @@ Sources.CallStackSidebarPane = class extends UI.SimpleView {
   }
 
   /**
+   * @param {!Sources.CallStackSidebarPane.Item} item
+   * @return {string|undefined}
+   */
+  _getItemFunctionName(item) {
+    if (item.debuggerCallFrame)
+      return item.debuggerCallFrame.functionName;
+    if (item.runtimeCallFrame)
+      return item.runtimeCallFrame.functionName;
+  }
+
+  /**
    * @override
    * @param {!Sources.CallStackSidebarPane.Item} item
    * @return {!Element}
@@ -185,7 +196,14 @@ Sources.CallStackSidebarPane = class extends UI.SimpleView {
   createElementForItem(item) {
     const element = createElementWithClass('div', 'call-frame-item');
     const title = element.createChild('div', 'call-frame-item-title');
-    title.createChild('div', 'call-frame-title-text').textContent = this._itemTitle(item);
+    const titleElement = title.createChild('div', 'call-frame-title-text');
+    titleElement.textContent = this._itemTitle(item);
+    if (dirac.hasBeautifyFunctionNames) {
+      const functionName = this._getItemFunctionName(item);
+      if (functionName) {
+        titleElement.title = dirac.getFullFunctionName(functionName);
+      }
+    }
     if (item.asyncStackHeader)
       element.classList.add('async-header');
 

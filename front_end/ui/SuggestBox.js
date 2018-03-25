@@ -79,6 +79,7 @@ UI.SuggestBox = class {
     this._glassPane.setAnchorBehavior(UI.GlassPane.AnchorBehavior.PreferBottom);
     this._glassPane.setOutsideClickCallback(this.hide.bind(this));
     const shadowRoot = UI.createShadowRootWithCoreStyles(this._glassPane.contentElement, 'ui/suggestBox.css');
+    UI.appendStyle(shadowRoot, "ui/suggestBox-dirac.css");
     shadowRoot.appendChild(this._element);
   }
 
@@ -127,13 +128,15 @@ UI.SuggestBox = class {
    * @return {number}
    */
   _maxWidth(items) {
-    const kMaxWidth = 300;
+    const kMaxWidth = 100000; // dirac: do not limit max-width
     if (!items.length)
       return kMaxWidth;
     let maxItem;
     let maxLength = -Infinity;
     for (let i = 0; i < items.length; i++) {
-      const length = (items[i].title || items[i].text).length + (items[i].subtitle || '').length;
+      let length = (items[i].title || items[i].text).length + (items[i].subtitle || '').length;
+      const length2 = (items[i].epilogue || '').length;
+      length = 54 + 6.7*length + 4.9*length2; // dirac's suggestion items are more complex, this is a rough estimate
       if (length > maxLength) {
         maxLength = length;
         maxItem = items[i];
@@ -206,7 +209,7 @@ UI.SuggestBox = class {
    */
   createElementForItem(item) {
     const query = this._userEnteredText;
-    const element = createElementWithClass('div', 'suggest-box-content-item source-code');
+    const element = createElementWithClass('div', 'suggest-box-content-item source-code ' + (item.className || ''));
     if (item.iconType) {
       const icon = UI.Icon.create(item.iconType, 'suggestion-icon');
       element.appendChild(icon);
@@ -214,16 +217,18 @@ UI.SuggestBox = class {
     if (item.isSecondary)
       element.classList.add('secondary');
     element.tabIndex = -1;
+    element.createChild("span", "prologue").textContent = (item.prologue || "").trimEnd(50);
     const maxTextLength = 50 + query.length;
     const displayText = (item.title || item.text).trimEnd(maxTextLength);
 
     const titleElement = element.createChild('span', 'suggestion-title');
     const index = displayText.toLowerCase().indexOf(query.toLowerCase());
     if (index > 0)
-      titleElement.createChild('span').textContent = displayText.substring(0, index);
+      titleElement.createChild('span', 'pre-query').textContent = displayText.substring(0, index);
     if (index > -1)
       titleElement.createChild('span', 'query').textContent = displayText.substring(index, index + query.length);
-    titleElement.createChild('span').textContent = displayText.substring(index > -1 ? index + query.length : 0);
+    titleElement.createChild('span', 'post-query').textContent = displayText.substring(index > -1 ? index + query.length : 0);
+    element.createChild("span", "epilogue").textContent = (item.epilogue || "").trimEnd(50);
     titleElement.createChild('span', 'spacer');
     if (item.subtitle) {
       const subtitleElement = element.createChild('span', 'suggestion-subtitle');
@@ -391,7 +396,8 @@ UI.SuggestBox = class {
 };
 
 /**
- * @typedef {!{text: string, subtitle: (string|undefined), iconType: (string|undefined), priority: (number|undefined), isSecondary: (boolean|undefined), title: (string|undefined)}}
+ * @typedef {!{text: string, subtitle: (string|undefined), iconType: (string|undefined), priority: (number|undefined), isSecondary: (boolean|undefined), title: (string|undefined),
+ * prologue: (string|undefined), epilogue: (string|undefined)}}
  */
 UI.SuggestBox.Suggestion;
 
